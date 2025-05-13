@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ChatHeader from '@/components/ChatHeader';
 import ChatInput from '@/components/ChatInput';
@@ -21,18 +20,18 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <ChatHeader />
-      
+
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
-          <ChatContainer 
-            messages={messages} 
+          <ChatContainer
+            messages={messages}
             onClearChat={handleClearChat}
             onRequestLocation={handleRequestLocation}
           />
         </div>
       </div>
-      
-      <ChatInput 
+
+      <ChatInput
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
       />

@@ -1,51 +1,64 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from datetime import datetime
+
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-CORS(app)  # Cho phép cross-origin requests
 
 
-@app.route('/', methods=['GET'])
-def welcome():
-    return jsonify({"status": "welcome plant disease detection"})
-
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "ok"})
-
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        # Xử lý dữ liệu đầu vào
-        if request.content_type and request.content_type.startswith('multipart/form-data'):
-            # Xử lý khi gửi hình ảnh
-            if 'image' not in request.files:
-                return jsonify({'error': 'No image provided'}), 400
-
-            file = request.files['image']
-            # Xử lý file, phân tích bệnh từ hình ảnh
-            # ...
-
-            # Giả lập kết quả
-            result = {"disease_name": "Bệnh đốm lá (từ hình ảnh)"}
+# Endpoint 1: Mock API dự đoán bệnh
+@app.route("/api/predict", methods=["POST"])
+def predict_disease():
+    if "image" in request.files:
+        # Logic xử lý đầu vào là hình ảnh
+        disease_info = {
+            "disease_name": "Bệnh đốm lá (Leaf spot)",
+            "details": "Bệnh đốm lá thường do nấm hoặc vi khuẩn gây ra. Biểu hiện là các đốm màu nâu hoặc đen...",
+            "treatment": "Loại bỏ lá bị bệnh, tăng cường thông gió, tưới nước vào gốc thay vì lên lá...",
+            "medications": ["Thuốc trừ nấm có chứa đồng", "Mancozeb", "Chế phẩm Trichoderma"]
+        }
+    elif request.json and "text" in request.json:
+        # Logic xử lý đầu vào là văn bản
+        text = request.json["text"].lower()
+        if "yellow" in text or "vàng" in text:
+            disease_info = {
+                "disease_name": "Bệnh vàng lá (Chlorosis)",
+                "details": "Bệnh vàng lá thường do thiếu các chất dinh dưỡng như sắt, mangan hoặc kẽm...",
+                "treatment": "Bón phân cân đối, phun dung dịch phân bón lá chứa vi lượng...",
+                "medications": ["Phân bón lá chứa sắt", "Phân vi lượng tổng hợp", "Chế phẩm điều chỉnh pH đất"]
+            }
+        elif "spot" in text or "đốm" in text:
+            disease_info = {
+                "disease_name": "Bệnh đốm lá (Leaf spot)",
+                "details": "Bệnh đốm lá thường do nấm hoặc vi khuẩn gây ra...",
+                "treatment": "Loại bỏ lá bị bệnh, tăng cường thông gió...",
+                "medications": ["Thuốc trừ nấm có chứa đồng", "Mancozeb", "Trichoderma"]
+            }
         else:
-            # Xử lý khi gửi văn bản
-            data = request.json
-            if not data or 'text' not in data:
-                return jsonify({'error': 'No text provided'}), 400
+            disease_info = {
+                "disease_name": "Không xác định",
+                "details": "Không thể xác định được bệnh dựa trên thông tin cung cấp.",
+                "treatment": "Hãy cung cấp thêm thông tin để phân tích chính xác hơn.",
+                "medications": []
+            }
+    else:
+        return jsonify({"error": "Vui lòng cung cấp text hoặc image để phân tích"}), 400
 
-            # Phân tích bệnh từ văn bản
-            # ...
-
-            # Giả lập kết quả
-            result = {"disease_name": f"Bệnh rỉ sắt (từ mô tả: {data['text'][:30]}...)"}
-
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return jsonify(disease_info)
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+# Endpoint 2: Mock API thời tiết
+@app.route("/api/weather", methods=["GET"])
+def weather_info():
+    # Lấy location từ query params
+    location = request.args.get('location', 'Không có vị trí')
+
+    # Dữ liệu mock cho thông tin thời tiết
+    weather_mock_data = {
+        "city": location,
+        "temperature": 32,
+        "condition": f"Thời tiết tại {location}",
+        "time": datetime.now().isoformat()
+    }
+    return jsonify(weather_mock_data)
+if __name__ == "__main__":
+    app.run(debug=True)
