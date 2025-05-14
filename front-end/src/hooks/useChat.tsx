@@ -148,7 +148,7 @@ export const useChat = (): UseChatResult => {
 
       toast({
         title: "Đã nhận vị trí",
-        description: `Backend đã nhận được vị trí: ${values.location}`,
+        description: `${values.location}`,
       });
     } catch (error) {
       console.error('Error getting location response:', error);

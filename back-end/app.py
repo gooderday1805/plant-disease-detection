@@ -16,7 +16,7 @@ def predict_disease():
     # Image -> model AI -> Disease info
     # Text -> llm -> result
     print("Info request: text / file ")
-    print(request.json["text"])
+    # print(request.json["text"])
     if "image" in request.files:
         # Logic xử lý đầu vào là hình ảnh
         disease_info = {
