@@ -4,10 +4,19 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# Mock Test say hello api
+@app.route("/", methods=["GET"])
+def hello():
+    return jsonify({"message": "Hello, World!"})
 
 # Endpoint 1: Mock API dự đoán bệnh
 @app.route("/api/predict", methods=["POST"])
 def predict_disease():
+    # Info request 
+    # Image -> model AI -> Disease info
+    # Text -> llm -> result
+    print("Info request: text / file ")
+    print(request.json["text"])
     if "image" in request.files:
         # Logic xử lý đầu vào là hình ảnh
         disease_info = {
@@ -47,18 +56,24 @@ def predict_disease():
 
 
 # Endpoint 2: Mock API thời tiết
+# @app.route("/api/weather", methods=["GET"])
+# def weather_info():
+#     # Lấy location từ query params
+#     location = request.args.get('location', 'Không có vị trí')
+
+#     # Dữ liệu mock cho thông tin thời tiết
+#     weather_mock_data = {
+#         "city": location,
+#         "temperature": 32,
+#         "condition": f"Thời tiết tại {location}",
+#         "time": datetime.now().isoformat()
+#     }
+#     return jsonify(weather_mock_data)
 @app.route("/api/weather", methods=["GET"])
 def weather_info():
-    # Lấy location từ query params
     location = request.args.get('location', 'Không có vị trí')
 
-    # Dữ liệu mock cho thông tin thời tiết
-    weather_mock_data = {
-        "city": location,
-        "temperature": 32,
-        "condition": f"Thời tiết tại {location}",
-        "time": datetime.now().isoformat()
-    }
-    return jsonify(weather_mock_data)
+    return jsonify({"message": f"hello from {location}"})
+
 if __name__ == "__main__":
     app.run(debug=True)

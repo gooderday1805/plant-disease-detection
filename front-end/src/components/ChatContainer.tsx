@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import WelcomeMessage from '@/components/WelcomeMessage';

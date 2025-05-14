@@ -49,17 +49,21 @@ interface WeatherResponse {
   time: string;
 }
 
-// Hàm lấy dữ liệu thời tiết
 export const getWeatherData = async (location: string) => {
   try {
-    // Gọi API với location
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
-      throw new Error('Lỗi khi lấy dữ liệu thời tiết');
+      throw new Error('Lỗi khi lấy dữ liệu thời tiết từ server');
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu thời tiết:', error);
     throw error;
