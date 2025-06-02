@@ -15,10 +15,13 @@ from utils import preprocessing_image_to_graph
 
 class LeafDiseasePredictor:
     def __init__(self, model_path, label_map_path=None, device='cpu'):
-        self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        if device == 'auto':
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = torch.device(device)
         self.model = self._load_model(model_path)
         self.label_map = self._load_label_map(label_map_path)
         self.idx_to_label = {v: k for k, v in self.label_map.items()} if self.label_map else None
+
     
     def _load_model(self, model_path):
         checkpoint = torch.load(model_path, map_location=self.device, weights_only=True)
