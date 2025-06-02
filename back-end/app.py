@@ -1,32 +1,47 @@
 from datetime import datetime
-
 from flask import Flask, request, jsonify
 
+# Import ai_model
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from ai_model.predict import LeafDiseasePredictor
+
+# Create Flask app
 app = Flask(__name__)
+
+# Load ai_model
+predictor = LeafDiseasePredictor(
+    model_path='ai_model/model.pt',
+    label_map_path='ai_model/label_map_vi.json',
+    device='auto'
+)
 
 # Mock Test say hello api
 @app.route("/", methods=["GET"])
 def hello():
     return jsonify({"message": "Hello, World!"})
 
-# Endpoint 1: Mock API dự đoán bệnh
+# API về bệnh lá
 @app.route("/api/predict", methods=["POST"])
 def predict_disease():
-    # Info request 
-    # Image -> model AI -> Disease info
-    # Text -> llm -> result
-    print("Info request: text / file ")
-    # print(request.json["text"])
     if "image" in request.files:
-        # Logic xử lý đầu vào là hình ảnh
+        image_file = request.files["image"]
+        image_path = f"/tmp/{image_file.filename}"
+        image_file.save(image_path)
+
+        # Dự đoán tên bệnh
+        disease_name = predictor.predict(image_path)
+
         disease_info = {
-            "disease_name": "Bệnh đốm lá (Leaf spot)",
-            "details": "Bệnh đốm lá thường do nấm hoặc vi khuẩn gây ra. Biểu hiện là các đốm màu nâu hoặc đen...",
-            "treatment": "Loại bỏ lá bị bệnh, tăng cường thông gió, tưới nước vào gốc thay vì lên lá...",
-            "medications": ["Thuốc trừ nấm có chứa đồng", "Mancozeb", "Chế phẩm Trichoderma"]
+            "disease_name": disease_name,
+            "details": "",
+            "treatment": "",
+            "medications": []
         }
+        
     elif request.json and "text" in request.json:
-        # Logic xử lý đầu vào là văn bản
+        # NOTE: Chưa code đoạn nàynày
         text = request.json["text"].lower()
         if "yellow" in text or "vàng" in text:
             disease_info = {
@@ -54,21 +69,6 @@ def predict_disease():
 
     return jsonify(disease_info)
 
-
-# Endpoint 2: Mock API thời tiết
-# @app.route("/api/weather", methods=["GET"])
-# def weather_info():
-#     # Lấy location từ query params
-#     location = request.args.get('location', 'Không có vị trí')
-
-#     # Dữ liệu mock cho thông tin thời tiết
-#     weather_mock_data = {
-#         "city": location,
-#         "temperature": 32,
-#         "condition": f"Thời tiết tại {location}",
-#         "time": datetime.now().isoformat()
-#     }
-#     return jsonify(weather_mock_data)
 @app.route("/api/weather", methods=["GET"])
 def weather_info():
     location = request.args.get('location', 'Không có vị trí')
