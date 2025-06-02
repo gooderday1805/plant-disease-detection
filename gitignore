@@ -1,6 +1,6 @@
 # Thư mục môi trường ảo
 .venv/
-
+venv/
 # Thư mục cấu hình của IDE (ví dụ: PyCharm)
 .idea/
 
@@ -9,3 +9,10 @@
 
 # Nếu bạn muốn ignore requirements.txt, chỉ cần ghi tên file, không có dấu /
 requirements.txt
+
+
+.gitconfig
+
+__pycache__/
+*.pyc
+
