@@ -1,18 +1,32 @@
-# Thư mục môi trường ảo
+# Môi trường ảo
 .venv/
 venv/
-# Thư mục cấu hình của IDE (ví dụ: PyCharm)
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
 .idea/
+.vscode/
 
-# File .env chứa biến môi trường - nên ignore
+# Biến môi trường và cấu hình bí mật
 .env
-
-# Nếu bạn muốn ignore requirements.txt, chỉ cần ghi tên file, không có dấu /
-requirements.txt
-
-
+*.env
 .gitconfig
 
-__pycache__/
-*.pyc
+# File dependency nếu không cần theo dõi
+# requirements.txt
+
+# File hệ thống
+.DS_Store
+Thumbs.db
+
+# Log và build
+*.log
+*.egg-info/
+build/
+dist/
+
 
