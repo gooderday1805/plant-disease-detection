@@ -74,21 +74,58 @@ export const useChat = (): UseChatResult => {
         image: image || undefined
       });
 
-      // Create system message
-      const systemMessage: Message = {
-        id: SessionStorage.generateId(),
-        role: 'system',
-        content: `Kết quả chẩn đoán: ${response.disease_name}`,
-        timestamp: Date.now(),
-        diseaseInfo: response,
-        isLocationRequest: true
-      };
+      console.log('API Response:', response);
 
-      // Update UI with system message
-      setMessages(prev => [...prev, systemMessage]);
+      // Check if response is for image (DiseaseResponse) or text (TextResponse)
+      if ('disease_name' in response) {
+        // Image response - create location request system message
+        const locationRequestMessage: Message = {
+          id: SessionStorage.generateId(),
+          role: 'system',
+          content: `Kết quả chẩn đoán: ${response.disease_name}`,
+          timestamp: Date.now(),
+          diseaseInfo: response,
+          isLocationRequest: true
+        };
 
-      // Save to session storage
-      SessionStorage.addMessage(sessionId, systemMessage);
+        // Update UI with location request message
+        setMessages(prev => [...prev, locationRequestMessage]);
+
+        // Save to session storage
+        SessionStorage.addMessage(sessionId, locationRequestMessage);
+      } else {
+        // Text response - display as simple string
+        let displayContent = '';
+        
+        if (typeof response === 'string') {
+          displayContent = response;
+        } else if (response.message) {
+          displayContent = response.message;
+        } else if (response.related_info) {
+          // Format the related info nicely
+          if (Array.isArray(response.related_info)) {
+            displayContent = response.related_info.join('\n\n');
+          } else {
+            displayContent = String(response.related_info);
+          }
+        } else {
+          // Fallback to showing the entire response as formatted string
+          displayContent = JSON.stringify(response, null, 2);
+        }
+
+        const textResponseMessage: Message = {
+          id: SessionStorage.generateId(),
+          role: 'system',
+          content: displayContent,
+          timestamp: Date.now()
+        };
+
+        // Update UI with text response message
+        setMessages(prev => [...prev, textResponseMessage]);
+
+        // Save to session storage
+        SessionStorage.addMessage(sessionId, textResponseMessage);
+      }
     } catch (error) {
       console.error('Error getting prediction:', error);
       toast({
@@ -161,7 +198,6 @@ export const useChat = (): UseChatResult => {
       setIsLoading(false);
     }
   };
-
   const handleClearChat = () => {
     // Create new session
     const newSession = SessionStorage.createSession();

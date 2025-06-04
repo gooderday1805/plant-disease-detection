@@ -25,7 +25,7 @@ const WelcomeMessage = () => {
       <h1 className="text-2xl font-semibold mb-2">Welcome to Leaf Whisper</h1>
       
       <p className="text-muted-foreground mb-6">
-        Giúp chuẩn đoán bệnh lá cây thông qua mô tả hoặc hình ảnh
+        Giúp chuẩn đoán bệnh lá cây lúa thông qua mô tả hoặc hình ảnh
       </p>
       
       <div className="bg-secondary/50 rounded-xl p-4 mb-6 text-left w-full">
