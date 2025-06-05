@@ -43,7 +43,7 @@ export const useChat = (): UseChatResult => {
     if (!text.trim() && !image) return;
 
     let imageUrl = '';
-
+    
     // If there's an image, create a local URL for display
     if (image) {
       imageUrl = URL.createObjectURL(image);
@@ -60,7 +60,7 @@ export const useChat = (): UseChatResult => {
 
     // Update UI
     setMessages(prev => [...prev, userMessage]);
-
+    
     // Save to session storage
     SessionStorage.addMessage(sessionId, userMessage);
 
@@ -74,9 +74,7 @@ export const useChat = (): UseChatResult => {
         image: image || undefined
       });
 
-      console.log('API Response:', response);
-
-      // Check if response is for image (DiseaseResponse) or text (TextResponse)
+      // Check if response has disease_name (image response) or message (text response)
       if ('disease_name' in response) {
         // Image response - create location request system message
         const locationRequestMessage: Message = {
@@ -90,39 +88,21 @@ export const useChat = (): UseChatResult => {
 
         // Update UI with location request message
         setMessages(prev => [...prev, locationRequestMessage]);
-
+        
         // Save to session storage
         SessionStorage.addMessage(sessionId, locationRequestMessage);
-      } else {
-        // Text response - display as simple string
-        let displayContent = '';
-        
-        if (typeof response === 'string') {
-          displayContent = response;
-        } else if (response.message) {
-          displayContent = response.message;
-        } else if (response.related_info) {
-          // Format the related info nicely
-          if (Array.isArray(response.related_info)) {
-            displayContent = response.related_info.join('\n\n');
-          } else {
-            displayContent = String(response.related_info);
-          }
-        } else {
-          // Fallback to showing the entire response as formatted string
-          displayContent = JSON.stringify(response, null, 2);
-        }
-
+      } else if ('message' in response) {
+        // Text response - show message from Gemini API
         const textResponseMessage: Message = {
           id: SessionStorage.generateId(),
           role: 'system',
-          content: displayContent,
+          content: response.message,
           timestamp: Date.now()
         };
 
         // Update UI with text response message
         setMessages(prev => [...prev, textResponseMessage]);
-
+        
         // Save to session storage
         SessionStorage.addMessage(sessionId, textResponseMessage);
       }
@@ -145,9 +125,9 @@ export const useChat = (): UseChatResult => {
 
   const handleLocationSubmit = async (values: { location: string }) => {
     setLocationDialogOpen(false);
-
+    
     if (!values.location.trim()) return;
-
+    
     // Add user message with location
     const userLocationMessage: Message = {
       id: SessionStorage.generateId(),
@@ -163,47 +143,45 @@ export const useChat = (): UseChatResult => {
     setIsLoading(true);
 
     try {
-      const response = await getWeatherData(values.location); // sẽ trả về { message: "hello {location}" }
-
-      // Tạo tin nhắn chào từ backend
-      const helloMessage: Message = {
+      // Call the backend API - it returns { message: location }
+      const weatherData = await getWeatherData(values.location);
+      
+      // Create system message with the response
+      const weatherMessage: Message = {
         id: SessionStorage.generateId(),
         role: 'system',
-        content: response.message || `Hello ${values.location}!`,
-        timestamp: Date.now(),
-        weatherInfo: {
-          location: values.location,
-          condition: "N/A",
-          temperature: 0,
-          time: new Date().toISOString()
-        }
+        content: weatherData.message || `Đã nhận vị trí: ${values.location}`,
+        timestamp: Date.now()
       };
 
-      // Thêm tin nhắn chào vào danh sách
-      setMessages(prev => [...prev, helloMessage]);
-      SessionStorage.addMessage(sessionId, helloMessage);
+      // Update messages
+      setMessages(prev => [...prev, weatherMessage]);
+      
+      // Save to session storage
+      SessionStorage.addMessage(sessionId, weatherMessage);
 
       toast({
-        title: "Đã nhận vị trí",
-        description: `${values.location}`,
+        title: "Thông tin vị trí",
+        description: `Đã cập nhật vị trí: ${values.location}`,
       });
     } catch (error) {
-      console.error('Error getting location response:', error);
+      console.error('Error getting weather data:', error);
       toast({
         title: "Lỗi",
-        description: "Không thể xử lý vị trí. Vui lòng thử lại.",
+        description: "Không thể lấy thông tin vị trí. Vui lòng thử lại.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
+
   const handleClearChat = () => {
     // Create new session
     const newSession = SessionStorage.createSession();
     setSessionId(newSession.id);
     setMessages([]);
-
+    
     toast({
       title: "Đã xóa cuộc trò chuyện",
       description: "Bắt đầu cuộc hội thoại mới",

@@ -1,29 +1,23 @@
+import { DiseaseOrTextResponse } from '@/types';
+
+const API_URL = '/api/predict';
+const WEATHER_API_URL = '/api/weather';
+
 interface PredictDiseaseParams {
   text?: string;
   image?: File;
 }
 
-interface DiseaseResponse {
-  disease_name: string;
-  details: string;
-  treatment: string;
-  medications: string[];
-}
-
 // Hàm gọi API để dự đoán bệnh
-export const predictDisease = async ({ text, image }: PredictDiseaseParams): Promise<DiseaseResponse> => {
+export const predictDisease = async ({ text, image }: PredictDiseaseParams): Promise<DiseaseOrTextResponse> => {
   try {
     const formData = new FormData();
-
-    if (text) {
-      formData.append('text', text);
-    }
 
     if (image) {
       formData.append('image', image);
     }
 
-    const response = await fetch('/api/predict', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       body: image ? formData : JSON.stringify({ text }),
       headers: image ? undefined : {
@@ -42,22 +36,15 @@ export const predictDisease = async ({ text, image }: PredictDiseaseParams): Pro
   }
 };
 
-interface WeatherResponse {
-  city: string;
-  temperature: number;
-  condition: string;
-  time: string;
-}
-
 export const getWeatherData = async (location: string) => {
   try {
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+    const response = await fetch(`${WEATHER_API_URL}?location=${encodeURIComponent(location)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
+    
     if (!response.ok) {
       throw new Error('Lỗi khi lấy dữ liệu thời tiết từ server');
     }

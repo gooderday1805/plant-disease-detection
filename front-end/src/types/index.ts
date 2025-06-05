@@ -1,4 +1,3 @@
-
 export interface Message {
   id: string;
   role: 'user' | 'system';
@@ -16,6 +15,19 @@ export interface DiseaseInfo {
   treatment: string;
   medications: string[];
 }
+
+export interface DiseaseResponse {
+  disease_name: string;
+  details: string;
+  treatment: string;
+  medications: string[];
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export type DiseaseOrTextResponse = DiseaseResponse | MessageResponse;
 
 export interface WeatherInfo {
   location: string;
