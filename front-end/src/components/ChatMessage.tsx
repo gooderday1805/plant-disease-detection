@@ -2,19 +2,17 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Message } from '@/types';
 import DiseaseDetails from './DiseaseDetails';
+import MarkdownContent from './MarkdownContent';
+import { Button } from '@/components/ui/button';
 
 interface ChatMessageProps {
   message: Message;
-  onRequestLocation: (messageId: string, location: string) => void;
+  onRequestLocation: (messageId: string) => void;
 }
 
 const ChatMessage = ({ message, onRequestLocation }: ChatMessageProps) => {
   const isUser = message.role === 'user';
-
-  const handleLocationSubmit = (location: string) => {
-    onRequestLocation(message.id, location);
-  };
-
+  
   return (
     <div className={cn(
       "flex w-full mb-4 animate-in fade-in duration-300",
@@ -41,31 +39,50 @@ const ChatMessage = ({ message, onRequestLocation }: ChatMessageProps) => {
             </svg>
           )}
         </div>
-
+        
         <div className={cn(
           "py-3 px-4 rounded-2xl",
-          isUser
-            ? "bg-primary text-primary-foreground rounded-tr-none"
+          isUser 
+            ? "bg-primary text-primary-foreground rounded-tr-none" 
             : "bg-secondary text-secondary-foreground rounded-tl-none"
         )}>
-          {message.content}
-
+          {/* Check if it's a long formatted message from system */}
+          {!isUser && message.content.length > 200 && message.content.includes('**') ? (
+            <MarkdownContent content={message.content} />
+          ) : (
+            message.content
+          )}
+          
           {message.image && (
             <div className="mt-2 max-w-xs">
-              <img
-                src={message.image}
-                alt="Uploaded leaf image"
+              <img 
+                src={message.image} 
+                alt="Uploaded leaf image" 
                 className="rounded-md max-w-full h-auto object-cover"
               />
             </div>
           )}
-
+          
           {message.diseaseInfo && !isUser && (
-            <DiseaseDetails
-              diseaseInfo={message.diseaseInfo}
+            <DiseaseDetails 
+              diseaseInfo={message.diseaseInfo} 
               weatherInfo={message.weatherInfo}
-              onRequestLocation={handleLocationSubmit}
+              onRequestLocation={() => onRequestLocation(message.id)}
             />
+          )}
+          
+          {message.isLocationRequest && !isUser && (
+            <div className="mt-3">
+              <p className="text-sm mb-2">Để nhận thông tin điều trị chính xác hơn, vui lòng cung cấp vị trí của bạn</p>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => onRequestLocation(message.id)}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                Cung cấp vị trí của bạn
+              </Button>
+            </div>
           )}
         </div>
       </div>
